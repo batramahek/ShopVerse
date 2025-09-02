@@ -105,12 +105,6 @@ The frontend will start on `http://localhost:3000`
 
 The backend automatically creates all necessary tables on startup. Make sure MySQL is running and the database is configured in `backend/src/main/resources/application.properties`.
 
-## Contributing
-
-1. Make changes in the appropriate directory (backend/ or frontend/)
-2. Test your changes
-3. Update relevant documentation
-4. Commit and push your changes
 
 ## License
 
