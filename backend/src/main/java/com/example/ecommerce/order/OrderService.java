@@ -32,26 +32,33 @@ public class OrderService {
     private ProductService productService;
 
     // Create order from cart (checkout)
-    public Order createOrderFromCart(Long userId) {
-        User user = userService.getUserById(userId)
+    public Order createOrderFromCart(CreateOrderRequest request) {
+        User user = userService.getUserById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Cart cart = cartService.getCart(userId);
+        Cart cart = cartService.validateCartForCheckout(request.getUserId());
         
-        if (cart.isEmpty()) {
-            throw new RuntimeException("Cannot create order from empty cart");
-        }
-
-        // Validate stock availability
-        for (CartItem cartItem : cart.getCartItems()) {
-            Product product = cartItem.getProduct();
-            if (product.getStock() < cartItem.getQuantity()) {
-                throw new RuntimeException("Insufficient stock for product: " + product.getName());
-            }
-        }
-
-        // Create new order
+        // Create new order with shipping information
         Order order = new Order(user, cart.getTotalPrice());
+        
+        // Set shipping details if provided
+        if (request.getShippingAddress() != null && !request.getShippingAddress().trim().isEmpty()) {
+            order.setShippingAddress(request.getShippingAddress());
+            order.setShippingCity(request.getShippingCity());
+            order.setShippingState(request.getShippingState());
+            order.setShippingZipCode(request.getShippingZipCode());
+            order.setShippingCountry(request.getShippingCountry());
+        }
+        
+        // Set payment method if provided
+        if (request.getPaymentMethod() != null && !request.getPaymentMethod().trim().isEmpty()) {
+            order.setPaymentMethod(request.getPaymentMethod());
+        }
+        
+        // Set notes if provided
+        if (request.getNotes() != null && !request.getNotes().trim().isEmpty()) {
+            order.setNotes(request.getNotes());
+        }
         
         // Convert cart items to order items
         for (CartItem cartItem : cart.getCartItems()) {
@@ -74,7 +81,7 @@ public class OrderService {
         Order savedOrder = orderRepository.save(order);
         
         // Clear the cart after successful order creation
-        cartService.clearCart(userId);
+        cartService.clearCart(request.getUserId());
         
         return savedOrder;
     }

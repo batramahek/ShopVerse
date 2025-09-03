@@ -1,7 +1,10 @@
 package com.example.ecommerce.order;
 
+import com.example.ecommerce.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -16,11 +19,25 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private UserService userService;
+
+    // Helper method to get current user ID
+    private Long getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return userService.getUserByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"))
+                .getId();
+    }
+
     // POST /api/orders/create - create order from cart (checkout)
     @PostMapping("/create")
     public ResponseEntity<?> createOrder(@RequestBody CreateOrderRequest request) {
         try {
-            Order order = orderService.createOrderFromCart(request.getUserId());
+            // Set the userId from the authenticated user
+            request.setUserId(getCurrentUserId());
+            Order order = orderService.createOrderFromCart(request);
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Order created successfully!");
             response.put("order", order);
@@ -32,10 +49,11 @@ public class OrderController {
         }
     }
 
-    // GET /api/orders/{userId} - get all orders for a user
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Order>> getOrdersByUserId(@PathVariable Long userId) {
+    // GET /api/orders - get all orders for current user
+    @GetMapping
+    public ResponseEntity<List<Order>> getCurrentUserOrders() {
         try {
+            Long userId = getCurrentUserId();
             List<Order> orders = orderService.getOrdersByUserId(userId);
             return ResponseEntity.ok(orders);
         } catch (RuntimeException e) {
@@ -43,10 +61,11 @@ public class OrderController {
         }
     }
 
-    // GET /api/orders/{userId}/{orderId} - get specific order details for a user
-    @GetMapping("/{userId}/{orderId}")
-    public ResponseEntity<Order> getOrderById(@PathVariable Long userId, @PathVariable Long orderId) {
+    // GET /api/orders/{orderId} - get specific order details for current user
+    @GetMapping("/{orderId}")
+    public ResponseEntity<Order> getOrderById(@PathVariable Long orderId) {
         try {
+            Long userId = getCurrentUserId();
             Order order = orderService.getOrderByIdAndUserId(orderId, userId);
             return ResponseEntity.ok(order);
         } catch (RuntimeException e) {
@@ -54,13 +73,13 @@ public class OrderController {
         }
     }
 
-    // PUT /api/orders/{userId}/{orderId}/status - update order status
-    @PutMapping("/{userId}/{orderId}/status")
+    // PUT /api/orders/{orderId}/status - update order status for current user
+    @PutMapping("/{orderId}/status")
     public ResponseEntity<?> updateOrderStatus(
-            @PathVariable Long userId,
             @PathVariable Long orderId,
             @RequestBody UpdateOrderStatusRequest request) {
         try {
+            Long userId = getCurrentUserId();
             Order order = orderService.updateOrderStatusAndUserId(orderId, userId, request.getStatus());
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Order status updated successfully!");
@@ -73,10 +92,11 @@ public class OrderController {
         }
     }
 
-    // DELETE /api/orders/{userId}/{orderId}/cancel - cancel order
-    @DeleteMapping("/{userId}/{orderId}/cancel")
-    public ResponseEntity<?> cancelOrder(@PathVariable Long userId, @PathVariable Long orderId) {
+    // DELETE /api/orders/{orderId}/cancel - cancel order for current user
+    @DeleteMapping("/{orderId}/cancel")
+    public ResponseEntity<?> cancelOrder(@PathVariable Long orderId) {
         try {
+            Long userId = getCurrentUserId();
             Order order = orderService.cancelOrderAndUserId(orderId, userId);
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Order cancelled successfully!");

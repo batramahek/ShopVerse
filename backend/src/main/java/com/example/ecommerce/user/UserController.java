@@ -1,7 +1,10 @@
 package com.example.ecommerce.user;
 
+import com.example.ecommerce.config.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -16,6 +19,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     // GET /api/users - get all users
     @GetMapping
@@ -57,9 +63,13 @@ public class UserController {
         
         if (isAuthenticated) {
             Optional<User> user = userService.getUserByUsername(loginRequest.getUsername());
+            String token = jwtUtil.generateToken(loginRequest.getUsername());
+            
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Login successful!");
             response.put("user", user.get());
+            response.put("token", token);
+            response.put("tokenType", "Bearer");
             return ResponseEntity.ok(response);
         } else {
             Map<String, String> error = new HashMap<>();
@@ -91,6 +101,28 @@ public class UserController {
             Map<String, String> error = new HashMap<>();
             error.put("error", "User not found");
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    // GET /api/users/me - get current authenticated user
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
+            
+            Optional<User> user = userService.getUserByUsername(username);
+            if (user.isPresent()) {
+                return ResponseEntity.ok(user.get());
+            } else {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "User not found");
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Authentication failed");
+            return ResponseEntity.status(401).body(error);
         }
     }
 }

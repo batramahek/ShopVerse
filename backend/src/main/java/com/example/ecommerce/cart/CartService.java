@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.math.BigDecimal;
 
 @Service
 @Transactional
@@ -127,5 +128,34 @@ public class CartService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
         return getOrCreateCart(user);
+    }
+
+    // Checkout validation - validates cart before creating order
+    public Cart validateCartForCheckout(Long userId) {
+        User user = userService.getUserById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        Cart cart = getOrCreateCart(user);
+        
+        if (cart.isEmpty()) {
+            throw new RuntimeException("Cannot checkout with empty cart");
+        }
+
+        // Validate stock availability for all items
+        for (CartItem cartItem : cart.getCartItems()) {
+            Product product = cartItem.getProduct();
+            if (product.getStock() < cartItem.getQuantity()) {
+                throw new RuntimeException("Insufficient stock for product: " + product.getName() + 
+                    " (Available: " + product.getStock() + ", Requested: " + cartItem.getQuantity() + ")");
+            }
+        }
+
+        return cart;
+    }
+
+    // Get cart total for checkout display
+    public BigDecimal getCartTotal(Long userId) {
+        Cart cart = getCart(userId);
+        return cart.getTotalPrice();
     }
 }

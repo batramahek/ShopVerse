@@ -54,22 +54,24 @@ The frontend will start on `http://localhost:3000`
 ### Backend API
 - **User Management**: Registration, authentication, profile management
 - **Product Catalog**: CRUD operations for products
-- **Shopping Cart**: Add, remove, update cart items
-- **Order Management**: Checkout, order tracking, status updates
+- **Shopping Cart**: Add, remove, update cart items, checkout preview
+- **Order Management**: Checkout with shipping/payment info, order tracking, status updates
 - **Security**: Password hashing, user validation
 
 ### Frontend (Coming Soon)
 - User authentication interface
 - Product browsing and search
 - Shopping cart management
+- **Checkout process with shipping and payment information**
 - Order placement and tracking
 - Responsive design
 
 ## API Documentation
 
-- **User APIs**: See `backend/test_api_examples.md`
-- **Cart APIs**: See `backend/cart_api_examples.md`
-- **Order APIs**: See `backend/order_api_examples.md`
+- **User APIs**: See `test_api_examples.md`
+- **Cart APIs**: See `cart_api_examples.md`
+- **Order APIs**: See `order_api_examples.md`
+- **Checkout APIs**: See `checkout_api_examples.md`
 
 ## Technologies
 

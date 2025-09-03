@@ -38,6 +38,29 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
+    // Shipping information
+    @Column(name = "shipping_address")
+    private String shippingAddress;
+
+    @Column(name = "shipping_city")
+    private String shippingCity;
+
+    @Column(name = "shipping_state")
+    private String shippingState;
+
+    @Column(name = "shipping_zip_code")
+    private String shippingZipCode;
+
+    @Column(name = "shipping_country")
+    private String shippingCountry;
+
+    // Payment and additional information
+    @Column(name = "payment_method")
+    private String paymentMethod;
+
+    @Column(name = "notes", length = 1000)
+    private String notes;
+
     // Constructor for easy creation
     public Order(User user, BigDecimal totalPrice) {
         this.user = user;
