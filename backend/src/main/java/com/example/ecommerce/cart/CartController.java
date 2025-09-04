@@ -33,11 +33,12 @@ public class CartController {
 
     // GET /api/cart - get current user's cart
     @GetMapping
-    public ResponseEntity<Cart> getCart() {
+    public ResponseEntity<CartResponseDTO> getCart() {
         try {
             Long userId = getCurrentUserId();
             Cart cart = cartService.getCart(userId);
-            return ResponseEntity.ok(cart);
+            CartResponseDTO cartDTO = CartResponseDTO.fromCart(cart);
+            return ResponseEntity.ok(cartDTO);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
@@ -49,9 +50,10 @@ public class CartController {
         try {
             Long userId = getCurrentUserId();
             Cart cart = cartService.addToCart(userId, request.getProductId(), request.getQuantity());
+            CartResponseDTO cartDTO = CartResponseDTO.fromCart(cart);
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Product added to cart successfully!");
-            response.put("cart", cart);
+            response.put("cart", cartDTO);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             Map<String, String> error = new HashMap<>();
@@ -66,9 +68,10 @@ public class CartController {
         try {
             Long userId = getCurrentUserId();
             Cart cart = cartService.removeFromCart(userId, productId);
+            CartResponseDTO cartDTO = CartResponseDTO.fromCart(cart);
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Product removed from cart successfully!");
-            response.put("cart", cart);
+            response.put("cart", cartDTO);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             Map<String, String> error = new HashMap<>();
@@ -85,9 +88,10 @@ public class CartController {
         try {
             Long userId = getCurrentUserId();
             Cart cart = cartService.updateQuantity(userId, productId, request.getQuantity());
+            CartResponseDTO cartDTO = CartResponseDTO.fromCart(cart);
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Cart updated successfully!");
-            response.put("cart", cart);
+            response.put("cart", cartDTO);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             Map<String, String> error = new HashMap<>();
@@ -102,9 +106,10 @@ public class CartController {
         try {
             Long userId = getCurrentUserId();
             Cart cart = cartService.clearCart(userId);
+            CartResponseDTO cartDTO = CartResponseDTO.fromCart(cart);
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Cart cleared successfully!");
-            response.put("cart", cart);
+            response.put("cart", cartDTO);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             Map<String, String> error = new HashMap<>();
@@ -123,7 +128,7 @@ public class CartController {
             
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Cart is ready for checkout!");
-            response.put("cart", cart);
+            response.put("cart", CartResponseDTO.fromCart(cart));
             response.put("total", total);
             response.put("itemCount", cart.getTotalItems());
             response.put("canCheckout", true);
