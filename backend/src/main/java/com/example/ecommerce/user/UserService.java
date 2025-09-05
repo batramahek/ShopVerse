@@ -28,8 +28,26 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
     
+    public Optional<User> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+    
     public User createUser(User user) {
-        // Check if username already exists
+        // Generate username from email if not provided
+        if (user.getUsername() == null || user.getUsername().isEmpty()) {
+            String baseUsername = user.getEmail().split("@")[0];
+            String username = baseUsername;
+            int counter = 1;
+            
+            // Ensure username is unique
+            while (userRepository.existsByUsername(username)) {
+                username = baseUsername + counter;
+                counter++;
+            }
+            user.setUsername(username);
+        }
+        
+        // Check if username already exists (double check)
         if (userRepository.existsByUsername(user.getUsername())) {
             throw new RuntimeException("Username already exists");
         }
@@ -59,7 +77,9 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
         user.setUsername(userDetails.getUsername());
+        user.setFullName(userDetails.getFullName());
         user.setEmail(userDetails.getEmail());
+        user.setPhone(userDetails.getPhone());
         
         // Only hash password if it's being updated
         if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
@@ -74,7 +94,9 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
         user.setUsername(userDetails.getUsername());
+        user.setFullName(userDetails.getFullName());
         user.setEmail(userDetails.getEmail());
+        user.setPhone(userDetails.getPhone());
         
         // Only hash password if it's being updated
         if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {

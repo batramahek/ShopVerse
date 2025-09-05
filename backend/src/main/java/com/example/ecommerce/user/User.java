@@ -23,17 +23,26 @@ public class User {
     private String username;
 
     @NotBlank
+    @Size(max = 100)
+    private String fullName;
+
+    @NotBlank
     @Size(max = 50)
     @Email
     private String email;
+
+    @Size(max = 20)
+    private String phone; // Optional field
 
     @NotBlank
     @Size(max = 120)
     private String password;
 
-    public User(String username, String email, String password) {
+    public User(String username, String fullName, String email, String password) {
         this.username = username;
+        this.fullName = fullName;
         this.email = email;
         this.password = password;
     }
+
 }

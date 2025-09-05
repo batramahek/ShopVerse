@@ -26,7 +26,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
                 // Public endpoints
-                .requestMatchers("/api/users/signup", "/api/users/login").permitAll()
+                .requestMatchers("/api/users/signup", "/api/users/login", "/api/users/test").permitAll()
                 .requestMatchers("/api/products/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll() // For development only
                 // Protected endpoints - require authentication
