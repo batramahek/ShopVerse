@@ -58,7 +58,7 @@ The frontend will start on `http://localhost:3000`
 - **Order Management**: Checkout with shipping/payment info, order tracking, status updates
 - **Security**: Password hashing, user validation
 
-### Frontend (Coming Soon)
+### Frontend 
 - User authentication interface
 - Product browsing and search
 - Shopping cart management
