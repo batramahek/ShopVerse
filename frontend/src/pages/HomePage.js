@@ -12,11 +12,13 @@ import {
 } from 'lucide-react';
 import { productsAPI } from '../utils/api';
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const HomePage = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const { addToCart, isInCart } = useCart();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     fetchFeaturedProducts();
@@ -96,9 +98,11 @@ const HomePage = () => {
               Start Shopping
               <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link to="/register" className="btn-outline text-lg px-8 py-4">
-              Create Account
-            </Link>
+            {!isAuthenticated && (
+              <Link to="/register" className="btn-outline text-lg px-8 py-4">
+                Create Account
+              </Link>
+            )}
           </div>
         </div>
       </section>

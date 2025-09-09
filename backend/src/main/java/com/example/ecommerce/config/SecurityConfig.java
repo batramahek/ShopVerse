@@ -37,8 +37,10 @@ public class SecurityConfig {
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
+        http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
         return http.build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

@@ -2,6 +2,9 @@ import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:8080/api';
 
+const getAuthToken = () => localStorage.getItem('jwt_token');
+
+
 // Create axios instance with default config
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -67,7 +70,7 @@ export const cartAPI = {
 
 // Orders API
 export const ordersAPI = {
-  create: (orderData) => api.post('/orders', orderData),
+  create: (orderData) => api.post('/orders\create', orderData),
   getAll: () => api.get('/orders'),
   getById: (id) => api.get(`/orders/${id}`),
   updateStatus: (id, status) => api.put(`/orders/${id}/status`, { status }),

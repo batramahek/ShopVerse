@@ -1,6 +1,9 @@
 package com.example.ecommerce.cart;
 
 import com.example.ecommerce.user.UserService;
+import com.example.ecommerce.order.OrderService;
+import com.example.ecommerce.order.CreateOrderRequest;
+import com.example.ecommerce.order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -21,6 +24,9 @@ public class CartController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private OrderService orderService;
 
     // Helper method to get current user ID
     private Long getCurrentUserId() {
@@ -140,4 +146,24 @@ public class CartController {
             return ResponseEntity.badRequest().body(error);
         }
     }
+   
+
+   @PostMapping("/checkout")
+    public ResponseEntity<?> checkoutCart(@RequestBody CreateOrderRequest request) {
+        try {
+            Long userId = getCurrentUserId();
+            Cart cart = cartService.validateCartForCheckout(userId);
+
+            request.setUserId(userId);
+            Order order = orderService.createOrderFromCart(request);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Cart checked out successfully!");
+            response.put("order", order);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+   }
 }

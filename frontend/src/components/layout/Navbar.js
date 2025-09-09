@@ -55,7 +55,7 @@ const Navbar = () => {
             <div className="w-10 h-10 bg-gradient-to-br from-primary-400 to-secondary-400 rounded-xl flex items-center justify-center">
               <span className="text-white font-bold text-xl">S</span>
             </div>
-            <span className="text-2xl font-bold gradient-text">ShopVerse</span>
+            <span className="text-2xl font-bold gradient-text mr-12">ShopVerse</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -86,7 +86,7 @@ const Navbar = () => {
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="input-field pr-10"
+                className="input-field pr-7"
               />
               <button
                 type="submit"

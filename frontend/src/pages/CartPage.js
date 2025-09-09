@@ -53,13 +53,20 @@ const CartPage = () => {
       return;
     }
 
+    const token = localStorage.getItem('jwt_token');
+    if (!token) {
+      toast.error('Please login to checkout');
+      navigate('/login');
+      return;
+    }
+
     setIsCheckingOut(true);
     try {
       const orderData = {
         items: cart.items.map(item => ({
           productId: item.productId,
           quantity: item.quantity,
-          price: item.price
+          price: item.unitPrice
         })),
         totalAmount: cart.totalPrice,
         shippingAddress: {
@@ -73,7 +80,7 @@ const CartPage = () => {
 
       const response = await ordersAPI.create(orderData);
       toast.success('Order placed successfully!');
-      navigate(`/orders/${response.data.id}`);
+      navigate(`/orders/${response.data.order.id}`);
     } catch (error) {
       const errorMessage = error.response?.data?.error || 'Failed to place order';
       toast.error(errorMessage);
@@ -320,10 +327,6 @@ const CartPage = () => {
                   <div className="flex items-center text-sm text-neutral-600">
                     <Truck size={16} className="mr-2 text-blue-600" />
                     Free shipping on orders over $50
-                  </div>
-                  <div className="flex items-center text-sm text-neutral-600">
-                    <Heart size={16} className="mr-2 text-red-600" />
-                    30-day return guarantee
                   </div>
                 </div>
               </div>
