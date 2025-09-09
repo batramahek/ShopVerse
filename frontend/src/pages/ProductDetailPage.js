@@ -71,7 +71,7 @@ const ProductDetailPage = () => {
 
     const success = await addToCart(productId, quantity);
     if (success) {
-      setQuantity(1);
+      setQuantity(quantity);
     }
   };
 

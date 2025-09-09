@@ -13,6 +13,13 @@ export const useCart = () => {
   return context;
 };
 
+const extractCart = (response) => {
+  if (!response) return null;
+  if (response.data?.cart) return response.data.cart; // when wrapped
+  return response.data; // when plain CartResponseDTO
+};
+
+
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -30,7 +37,7 @@ export const CartProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await cartAPI.get();
-      setCart(response.data);
+      setCart(extractCart(response));
     } catch (error) {
       console.error('Error fetching cart:', error);
       if (error.response?.status !== 404) {
@@ -50,7 +57,7 @@ export const CartProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await cartAPI.addItem(productId, quantity);
-      setCart(response.data.cart);
+      setCart(extractCart(response));
       toast.success('Item added to cart successfully!');
       return true;
     } catch (error) {
@@ -68,7 +75,7 @@ export const CartProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await cartAPI.updateQuantity(productId, quantity);
-      setCart(response.data.cart);
+      setCart(extractCart(response));
       toast.success('Cart updated successfully!');
       return true;
     } catch (error) {
@@ -86,7 +93,7 @@ export const CartProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await cartAPI.removeItem(productId);
-      setCart(response.data.cart);
+      setCart(extractCart(response));
       toast.success('Item removed from cart');
       return true;
     } catch (error) {
@@ -104,7 +111,7 @@ export const CartProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await cartAPI.clear();
-      setCart(response.data.cart);
+      setCart(extractCart(response));
       toast.success('Cart cleared successfully!');
       return true;
     } catch (error) {

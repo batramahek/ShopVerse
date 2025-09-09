@@ -188,8 +188,8 @@ const CartPage = () => {
                   <div className="flex gap-4">
                     <div className="relative w-24 h-24 flex-shrink-0">
                       <img
-                        src={item.imageUrl || 'https://via.placeholder.com/300x300?text=Product'}
-                        alt={item.name}
+                        src={item.productImage || 'https://via.placeholder.com/300x300?text=Product'}
+                        alt={item.productName}
                         className="w-full h-full object-cover rounded-lg"
                       />
                       {item.stock === 0 && (
@@ -201,10 +201,10 @@ const CartPage = () => {
                     
                     <div className="flex-1 min-w-0">
                       <h3 className="text-lg font-semibold text-neutral-800 mb-2 line-clamp-2">
-                        {item.name}
+                        {item.productName}
                       </h3>
                       <p className="text-neutral-600 text-sm mb-3 line-clamp-2">
-                        {item.description}
+                        {item.productDescription}
                       </p>
                       
                       <div className="flex items-center mb-3">
@@ -240,10 +240,10 @@ const CartPage = () => {
                           
                           <div className="text-right">
                             <div className="text-lg font-semibold text-neutral-800">
-                              ${(item.price * item.quantity).toFixed(2)}
+                              ${(item.unitPrice * item.quantity).toFixed(2)}
                             </div>
                             <div className="text-sm text-neutral-500">
-                              ${item.price} each
+                              ${item.unitPrice} each
                             </div>
                           </div>
                         </div>
