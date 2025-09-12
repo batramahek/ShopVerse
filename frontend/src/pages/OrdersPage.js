@@ -54,10 +54,13 @@ const OrdersPage = () => {
     try {
       setLoading(true);
       const response = await ordersAPI.getAll();
-      setOrders(response.data);
+      console.log('Orders response:', response.data);
+      // Ensure orders is always an array
+      setOrders(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching orders:', error);
       toast.error('Failed to load orders');
+      setOrders([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -107,23 +110,23 @@ const OrdersPage = () => {
     });
   };
 
-  const filteredOrders = orders
+  const filteredOrders = (Array.isArray(orders) ? orders : [])
     .filter(order => {
-      const matchesSearch = order.id.toString().includes(searchQuery) ||
-        order.items.some(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesSearch = order.orderId.toString().includes(searchQuery) ||
+        order.orderItems.some(item => item.product.name.toLowerCase().includes(searchQuery.toLowerCase()));
       const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
       return matchesSearch && matchesStatus;
     })
     .sort((a, b) => {
       switch (sortBy) {
         case 'newest':
-          return new Date(b.createdAt) - new Date(a.createdAt);
+          return new Date(b.orderDate) - new Date(a.orderDate);
         case 'oldest':
-          return new Date(a.createdAt) - new Date(b.createdAt);
+          return new Date(a.orderDate) - new Date(b.orderDate);
         case 'amount_high':
-          return b.totalAmount - a.totalAmount;
+          return b.totalPrice - a.totalPrice;
         case 'amount_low':
-          return a.totalAmount - b.totalAmount;
+          return a.totalPrice - b.totalPrice;
         default:
           return 0;
       }
@@ -176,7 +179,7 @@ const OrdersPage = () => {
             <div>
               <h1 className="text-3xl font-bold text-neutral-800">My Orders</h1>
               <p className="text-neutral-600">
-                {orders.length} {orders.length === 1 ? 'order' : 'orders'} found
+                {Array.isArray(orders) ? orders.length : 0} {Array.isArray(orders) && orders.length === 1 ? 'order' : 'orders'} found
               </p>
             </div>
           </div>
@@ -233,15 +236,15 @@ const OrdersPage = () => {
               <Package size={32} className="text-neutral-400" />
             </div>
             <h2 className="text-2xl font-semibold text-neutral-800 mb-4">
-              {orders.length === 0 ? 'No orders yet' : 'No orders match your filters'}
+              {(!Array.isArray(orders) || orders.length === 0) ? 'No orders yet' : 'No orders match your filters'}
             </h2>
             <p className="text-neutral-600 mb-8">
-              {orders.length === 0 
+              {(!Array.isArray(orders) || orders.length === 0)
                 ? 'Start shopping to see your orders here'
                 : 'Try adjusting your search or filter criteria'
               }
             </p>
-            {orders.length === 0 && (
+            {(!Array.isArray(orders) || orders.length === 0) && (
               <Link to="/products" className="btn-primary text-lg px-8 py-4">
                 Start Shopping
               </Link>
@@ -258,11 +261,11 @@ const OrdersPage = () => {
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold text-neutral-800">
-                        Order #{order.id}
+                        Order #{order.orderId}
                       </h3>
                       <div className="flex items-center gap-2 text-sm text-neutral-600">
                         <Calendar size={14} />
-                        <span>{formatDate(order.createdAt)}</span>
+                        <span>{formatDate(order.orderDate)}</span>
                       </div>
                     </div>
                   </div>
@@ -270,10 +273,10 @@ const OrdersPage = () => {
                   <div className="flex items-center gap-4">
                     <div className="text-right">
                       <div className="text-lg font-semibold text-neutral-800">
-                        ${order.totalAmount.toFixed(2)}
+                        ${order.totalPrice.toFixed(2)}
                       </div>
                       <div className="text-sm text-neutral-600">
-                        {order.items.length} {order.items.length === 1 ? 'item' : 'items'}
+                        {order.orderItems.length} {order.orderItems.length === 1 ? 'item' : 'items'}
                       </div>
                     </div>
                     
@@ -283,7 +286,7 @@ const OrdersPage = () => {
                     </div>
                     
                     <Link
-                      to={`/orders/${order.id}`}
+                      to={`/orders/${order.orderId}`}
                       className="btn-outline flex items-center gap-2"
                     >
                       <Eye size={16} />
@@ -295,28 +298,28 @@ const OrdersPage = () => {
                 {/* Order Items Preview */}
                 <div className="border-t border-neutral-200 pt-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {order.items.slice(0, 3).map((item, index) => (
+                    {order.orderItems.slice(0, 3).map((item, index) => (
                       <div key={index} className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-neutral-100 rounded-lg flex-shrink-0">
                           <img
-                            src={item.imageUrl || 'https://via.placeholder.com/100x100?text=Product'}
-                            alt={item.name}
+                            src={item.product.imageUrl || 'https://via.placeholder.com/100x100?text=Product'}
+                            alt={item.product.name}
                             className="w-full h-full object-cover rounded-lg"
                           />
                         </div>
                         <div className="min-w-0 flex-1">
                           <h4 className="text-sm font-medium text-neutral-800 truncate">
-                            {item.name}
+                            {item.product.name}
                           </h4>
                           <p className="text-sm text-neutral-600">
-                            Qty: {item.quantity} × ${item.price.toFixed(2)}
+                            Qty: {item.quantity} × ${item.unitPrice.toFixed(2)}
                           </p>
                         </div>
                       </div>
                     ))}
-                    {order.items.length > 3 && (
+                    {order.orderItems.length > 3 && (
                       <div className="flex items-center justify-center text-sm text-neutral-500">
-                        +{order.items.length - 3} more items
+                        +{order.orderItems.length - 3} more items
                       </div>
                     )}
                   </div>
@@ -326,7 +329,7 @@ const OrdersPage = () => {
                 <div className="flex flex-col sm:flex-row gap-3 mt-4 pt-4 border-t border-neutral-200">
                   <div className="flex-1">
                     <div className="text-sm text-neutral-600">
-                      <strong>Shipping Address:</strong> {order.shippingAddress?.street}, {order.shippingAddress?.city}, {order.shippingAddress?.state} {order.shippingAddress?.zipCode}
+                      <strong>Shipping Address:</strong> {order.shippingAddress}, {order.shippingCity}, {order.shippingState} {order.shippingZipCode}
                     </div>
                   </div>
                   

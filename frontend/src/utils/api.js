@@ -70,7 +70,7 @@ export const cartAPI = {
 
 // Orders API
 export const ordersAPI = {
-  create: (orderData) => api.post('/orders\create', orderData),
+  create: (orderData) => api.post('/orders/create', orderData),
   getAll: () => api.get('/orders'),
   getById: (id) => api.get(`/orders/${id}`),
   updateStatus: (id, status) => api.put(`/orders/${id}/status`, { status }),

@@ -14,14 +14,12 @@ import {
 } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
-import { ordersAPI } from '../utils/api';
 import toast from 'react-hot-toast';
 
 const CartPage = () => {
   const { cart, loading, updateQuantity, removeFromCart, clearCart, getCartTotal, getCartItemCount } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -47,7 +45,7 @@ const CartPage = () => {
     }
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (!cart || !cart.items || cart.items.length === 0) {
       toast.error('Your cart is empty');
       return;
@@ -60,33 +58,8 @@ const CartPage = () => {
       return;
     }
 
-    setIsCheckingOut(true);
-    try {
-      const orderData = {
-        items: cart.items.map(item => ({
-          productId: item.productId,
-          quantity: item.quantity,
-          price: item.unitPrice
-        })),
-        totalAmount: cart.totalPrice,
-        shippingAddress: {
-          street: '123 Main St',
-          city: 'New York',
-          state: 'NY',
-          zipCode: '10001',
-          country: 'USA'
-        }
-      };
-
-      const response = await ordersAPI.create(orderData);
-      toast.success('Order placed successfully!');
-      navigate(`/orders/${response.data.order.id}`);
-    } catch (error) {
-      const errorMessage = error.response?.data?.error || 'Failed to place order';
-      toast.error(errorMessage);
-    } finally {
-      setIsCheckingOut(false);
-    }
+    // Redirect to checkout page
+    navigate('/checkout');
   };
 
   const renderStars = (rating) => {
@@ -296,20 +269,13 @@ const CartPage = () => {
 
                 <button
                   onClick={handleCheckout}
-                  disabled={isCheckingOut || cart.items.some(item => item.stock === 0)}
+                  disabled={cart.items.some(item => item.stock === 0)}
                   className="btn-primary w-full py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed mb-4"
                 >
-                  {isCheckingOut ? (
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                      Processing...
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center">
-                      <CreditCard size={20} className="mr-2" />
-                      Proceed to Checkout
-                    </div>
-                  )}
+                  <div className="flex items-center justify-center">
+                    <CreditCard size={20} className="mr-2" />
+                    Proceed to Checkout
+                  </div>
                 </button>
 
                 {cart.items.some(item => item.stock === 0) && (

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { cartAPI } from '../utils/api';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
@@ -13,31 +13,20 @@ export const useCart = () => {
   return context;
 };
 
-const extractCart = (response) => {
-  if (!response) return null;
-  if (response.data?.cart) return response.data.cart; // when wrapped
-  return response.data; // when plain CartResponseDTO
-};
-
-
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(false);
   const { isAuthenticated } = useAuth();
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchCart();
-    }
-  }, [isAuthenticated]);
-
-  const fetchCart = async () => {
+  const fetchCart = useCallback(async () => {
+    console.log('fetchCart called - isAuthenticated:', isAuthenticated);
     if (!isAuthenticated) return;
     
     try {
       setLoading(true);
       const response = await cartAPI.get();
-      setCart(extractCart(response));
+      console.log('Cart response:', response.data);
+      setCart(response.data);
     } catch (error) {
       console.error('Error fetching cart:', error);
       if (error.response?.status !== 404) {
@@ -46,7 +35,14 @@ export const CartProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    console.log('CartContext useEffect - isAuthenticated:', isAuthenticated);
+    if (isAuthenticated) {
+      fetchCart();
+    }
+  }, [isAuthenticated, fetchCart]);
 
   const addToCart = async (productId, quantity = 1) => {
     if (!isAuthenticated) {
@@ -57,7 +53,7 @@ export const CartProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await cartAPI.addItem(productId, quantity);
-      setCart(extractCart(response));
+      setCart(response.data.cart);
       toast.success('Item added to cart successfully!');
       return true;
     } catch (error) {
@@ -75,7 +71,7 @@ export const CartProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await cartAPI.updateQuantity(productId, quantity);
-      setCart(extractCart(response));
+      setCart(response.data.cart);
       toast.success('Cart updated successfully!');
       return true;
     } catch (error) {
@@ -93,7 +89,7 @@ export const CartProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await cartAPI.removeItem(productId);
-      setCart(extractCart(response));
+      setCart(response.data.cart);
       toast.success('Item removed from cart');
       return true;
     } catch (error) {
@@ -111,7 +107,7 @@ export const CartProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await cartAPI.clear();
-      setCart(extractCart(response));
+      setCart(response.data.cart);
       toast.success('Cart cleared successfully!');
       return true;
     } catch (error) {

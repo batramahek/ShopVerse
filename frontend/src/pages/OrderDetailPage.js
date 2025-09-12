@@ -181,7 +181,7 @@ const OrderDetailPage = () => {
           </Link>
           <div>
             <h1 className="text-3xl font-bold text-neutral-800">Order Details</h1>
-            <p className="text-neutral-600">Order #{order.id}</p>
+            <p className="text-neutral-600">Order #{order.orderId}</p>
           </div>
         </div>
 
@@ -202,7 +202,7 @@ const OrderDetailPage = () => {
               </p>
               <div className="flex items-center gap-2 text-sm text-neutral-500">
                 <Calendar size={16} />
-                <span>Ordered on {formatDate(order.createdAt)}</span>
+                <span>Ordered on {formatDate(order.orderDate)}</span>
               </div>
             </div>
 
@@ -210,26 +210,26 @@ const OrderDetailPage = () => {
             <div className="bg-white rounded-xl p-6 shadow-soft">
               <h2 className="text-xl font-semibold text-neutral-800 mb-6">Order Items</h2>
               <div className="space-y-4">
-                {order.items.map((item, index) => (
+                {order.orderItems.map((item, index) => (
                   <div key={index} className="flex items-center gap-4 p-4 border border-neutral-200 rounded-lg">
                     <div className="w-16 h-16 bg-neutral-100 rounded-lg flex-shrink-0">
                       <img
-                        src={item.imageUrl || 'https://via.placeholder.com/100x100?text=Product'}
-                        alt={item.name}
+                        src={item.product.imageUrl || 'https://via.placeholder.com/100x100?text=Product'}
+                        alt={item.product.name}
                         className="w-full h-full object-cover rounded-lg"
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-neutral-800 mb-1">{item.name}</h3>
-                      <p className="text-sm text-neutral-600 mb-2">{item.description}</p>
+                      <h3 className="font-semibold text-neutral-800 mb-1">{item.product.name}</h3>
+                      <p className="text-sm text-neutral-600 mb-2">{item.product.description}</p>
                       <div className="flex items-center gap-4 text-sm text-neutral-500">
                         <span>Qty: {item.quantity}</span>
-                        <span>Price: ${item.price.toFixed(2)} each</span>
+                        <span>Price: ${item.unitPrice.toFixed(2)} each</span>
                       </div>
                     </div>
                     <div className="text-right">
                       <div className="text-lg font-semibold text-neutral-800">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        ${item.getSubtotal().toFixed(2)}
                       </div>
                     </div>
                   </div>
@@ -247,9 +247,9 @@ const OrderDetailPage = () => {
                     Shipping Address
                   </h3>
                   <div className="text-neutral-600 space-y-1">
-                    <p>{order.shippingAddress?.street}</p>
-                    <p>{order.shippingAddress?.city}, {order.shippingAddress?.state} {order.shippingAddress?.zipCode}</p>
-                    <p>{order.shippingAddress?.country}</p>
+                    <p>{order.shippingAddress}</p>
+                    <p>{order.shippingCity}, {order.shippingState} {order.shippingZipCode}</p>
+                    <p>{order.shippingCountry}</p>
                   </div>
                 </div>
                 
@@ -274,8 +274,8 @@ const OrderDetailPage = () => {
               <h3 className="text-lg font-semibold text-neutral-800 mb-4">Order Summary</h3>
               <div className="space-y-3">
                 <div className="flex justify-between text-neutral-600">
-                  <span>Subtotal ({order.items.length} items)</span>
-                  <span>${order.totalAmount.toFixed(2)}</span>
+                  <span>Subtotal ({order.orderItems.length} items)</span>
+                  <span>${order.totalPrice.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-neutral-600">
                   <span>Shipping</span>
@@ -283,12 +283,12 @@ const OrderDetailPage = () => {
                 </div>
                 <div className="flex justify-between text-neutral-600">
                   <span>Tax</span>
-                  <span>${(order.totalAmount * 0.08).toFixed(2)}</span>
+                  <span>${(order.totalPrice * 0.08).toFixed(2)}</span>
                 </div>
                 <div className="border-t border-neutral-200 pt-3">
                   <div className="flex justify-between text-lg font-semibold text-neutral-800">
                     <span>Total</span>
-                    <span>${(order.totalAmount * 1.08).toFixed(2)}</span>
+                    <span>${(order.totalPrice * 1.08).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
